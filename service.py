@@ -9,6 +9,9 @@ import json
 from flask import Flask, request, jsonify, Response
 from src import handlers, model
 
+import os
+import redis
+
 # pylint: disable=invalid-name
 app = Flask(__name__)
 
@@ -41,6 +44,22 @@ def ping():
         "status" : "pass"
     }
     return jsonify(resp)
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    """Readiness probe: verifica que el proceso y Redis estén funcionando"""
+    try:
+        # Nos conectamos directamente a Redis usando las variables de entorno
+        r = redis.Redis(
+            host=os.environ.get('REDIS_HOST', 'redis'),
+            port=int(os.environ.get('REDIS_PORT', 6379)),
+            socket_connect_timeout=2 # Si Redis no responde en 2 segs, falla
+        )
+        r.ping() # Envía un PING a Redis para verificar que está vivo
+        return {"status": "pass", "details": {"redis": "ok"}}, 200
+    except Exception as e:
+        return {"status": "fail", "error": str(e)}, 503
 
 def init():
     """Init routine for the microservice"""
