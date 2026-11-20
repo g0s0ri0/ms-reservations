@@ -37,7 +37,7 @@ def reserve():
         mimetype='application/json'
     )
 
-@app.route('/ping', methods=['GET'])
+@app.route('/reservations/ping', methods=['GET'])
 def ping():
     """ Liveness probe """
     resp = {
@@ -46,7 +46,7 @@ def ping():
     return jsonify(resp)
 
 
-@app.route('/health', methods=['GET'])
+@app.route('/reservations/health', methods=['GET'])
 def health():
     """Readiness probe: verifica que el proceso y Redis estén funcionando"""
     try:
